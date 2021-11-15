@@ -263,6 +263,7 @@ class ResNet18(nn.Module):
 
         return x
 
+
 class AGS_ResNet18(nn.Module):
     def __init__(self, net, n_steps=1, kernel_size=3, baselines=None, log_path=None):
         super(AGS_ResNet18, self).__init__()

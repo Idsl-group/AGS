@@ -1,38 +1,35 @@
 from Architectures.ResNet18 import *
 from Model import *
+import torchattacks
 from torch.utils.data.dataloader import DataLoader
 import torchvision
-import torchattacks
-import torchvision.transforms as T
+import  torchvision.transforms  as T
 import os
-
 
 # Settings
 config = {
-    'batch_size': 100,
+    'batch_size': 50,
     'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     'criterion': nn.CrossEntropyLoss(),
-    'optimizer': torch.optim.SGD,
-    'optimkwargs': {'lr':0.1, 'weight_decay':5e-4, 'momentum':0.9},
-    'scheduler': torch.optim.lr_scheduler.MultiStepLR,
-    'schedulerkwargs': {'milestones': [60, 120, 160], 'gamma':0.2},
-    'epochs': 200,
+    'optimizer': torch.optim.Adam,
+    'optimkwargs': {},
+    'scheduler': None,
+    'schedulerkwargs': {},
+    'epochs': 0,
     'in_channels': 3,
     'num_classes': 100,
     'n_steps': 10,
     'kernel_size': 3,
-    'experiment_name': "nominal-cifar100",
+    'experiment_name': "ags-cifar100",
     'model_log': None,
-    'defense_log': None,
     'attack': None,
     'thres': 0,
-    'attackkwargs': None,
+    'attackkwargs': {},
     'comments': None
 }
 config['experiment_path'] = str(os.getcwd()) + "/Experiment_logs/" + config['experiment_name'] + "/"
 if not os.path.isdir(config['experiment_path']):
     os.mkdir(config['experiment_path'])
-
 
 # Load dataset
 normalize = T.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -59,13 +56,12 @@ for x, y in train_loader:
     x[i] = mean
 baselines = x.to(config['device'])
 
+resnet = ResNet18(in_channels=config['in_channels'], num_classes=config['num_classes'])
+ags_cnn = AGS_ResNet18(resnet, baselines=baselines, n_steps=config['n_steps'], kernel_size=config['kernel_size'], log_path=config['model_log'])
+defense = Model(ags_cnn, config, config['experiment_name'])
 
-resnet18 = ResNet18(in_channels=config['in_channels'], num_classes=config['num_classes'])
-defense = Model(resnet18, config, config['experiment_name'])
-
-
-defense.train(val_loader, test_loader)
-
-
-list_of_attacks = [None]
+fgsm = torchattacks.FGSM(copy.deepcopy(defense.model), eps=8/255)
+pgd_linf = torchattacks.PGD(copy.deepcopy(defense.model), eps=8/255, alpha=0.1, steps=100, random_start=False)
+autoattack = torchattacks.AutoAttack(copy.deepcopy(defense.model), norm='Linf', eps=8/255, version='standard', n_classes=config['num_classes'], verbose=False)
+list_of_attacks =  [None, fgsm, pgd_linf, autoattack]
 defense.validate(val_loader, list_of_attacks=list_of_attacks)

@@ -1,4 +1,4 @@
-#https://github.com/huyvnphan/PyTorch_CIFAR10/blob/master/schduler.py
+#From: https://github.com/huyvnphan/PyTorch_CIFAR10/blob/master/schduler.py
 
 import math
 import warnings
@@ -51,7 +51,7 @@ class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
         self,
         optimizer: Optimizer,
         warmup_epochs: int = 30,
-        max_epochs: int= 90,
+        max_epochs: int= 100,
         warmup_start_lr: float = 1e-8,
         eta_min: float = 1e-8,
         last_epoch: int = -1,

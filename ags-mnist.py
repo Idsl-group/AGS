@@ -1,12 +1,10 @@
 from Architectures.CNN4_4 import *
 from Model import *
+import torchattacks
 from torch.utils.data.dataloader import DataLoader
 import torchvision
-from torchvision.transforms  import ToTensor
-import copy
-import torchattacks
+from  torchvision.transforms  import ToTensor
 import os
-
 
 # Settings
 config = {
@@ -17,24 +15,21 @@ config = {
     'optimkwargs': {},
     'scheduler': None,
     'schedulerkwargs': {},
-    'epochs': 20,
+    'epochs': 10,
     'in_channels': 1,
     'num_classes': 10,
     'n_steps': 10,
     'kernel_size': 3,
-    'experiment_name': "nominal-mnist",
+    'experiment_name': "ags-mnist",
     'model_log': None,
     'attack': None,
     'thres': 0,
     'attackkwargs': {},
     'comments': None
 }
-
-
 config['experiment_path'] = str(os.getcwd()) + "/Experiment_logs/" + config['experiment_name'] + "/"
 if not os.path.isdir(config['experiment_path']):
     os.mkdir(config['experiment_path'])
-
 
 # Load dataset
 train_data = torchvision.datasets.MNIST("../data", train=True, download=True, transform=ToTensor())
@@ -47,13 +42,12 @@ for x, y in train_loader:
   baselines = torch.zeros_like(x).to(config['device'])
   break
 
-
 cnn = CNN4_4(in_channels=config['in_channels'], num_classes=config['num_classes'])
-defense = Model(cnn, config, config['experiment_name'])
+ags_cnn = AGS_CNN4_4(cnn, baselines=baselines, n_steps=config['n_steps'], kernel_size=config['kernel_size'], log_path=config['model_log'])
+defense = Model(ags_cnn, config, config['experiment_name'])
 
-
-defense.train(val_loader, test_loader)
-
-
-list_of_attacks = [None]
+fgsm = torchattacks.FGSM(copy.deepcopy(defense.model), eps=0.3)
+pgd_linf = torchattacks.PGD(copy.deepcopy(defense.model), eps=0.3, alpha=0.1, steps=100, random_start=False)
+autoattack = torchattacks.AutoAttack(copy.deepcopy(defense.model), norm='Linf', eps=0.3, version='standard', n_classes=config['num_classes'], verbose=False)
+list_of_attacks =  [None, fgsm, pgd_linf, autoattack]
 defense.validate(val_loader, list_of_attacks=list_of_attacks)
