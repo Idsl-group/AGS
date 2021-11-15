@@ -276,9 +276,6 @@ class AGS_ResNet18(nn.Module):
             self.model = nn.DataParallel(self.model)
 
     def forward(self, x, show=False, v=1):
-        # Transfer everything to cpu, then cuda
-        x = x.cpu();  self.attrargs['baselines'] = self.attrargs['baselines'].cpu();
-        x = x.cuda(); self.attrargs['baselines'] = self.attrargs['baselines'].cuda();
         yt = self.model(x).max(1)[1]
         X = x.detach().clone()
         attr = attribute(self.attributions, x, yt, self.model, **self.attrargs).clip(0, 1)

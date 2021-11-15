@@ -24,6 +24,7 @@ class Model:
         self.criterion = self.config['criterion']
         self.model = defense
         self.defense_name = defense_name
+        self.model.to(self.device)
 
         # Set up log path
         defense_log = self.defense_name + "_" + str(datetime.datetime.now()).replace(" ", "_").replace(":", "-")[:19]

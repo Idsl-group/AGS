@@ -31,7 +31,7 @@ config = {
 }
 
 
-config['experiment_path'] = str(os.getcwd()) + "/AGS/Experiment_logs/" + config['experiment_name'] + "/"
+config['experiment_path'] = str(os.getcwd()) + "/Experiment_logs/" + config['experiment_name'] + "/"
 if not os.path.isdir(config['experiment_path']):
     os.mkdir(config['experiment_path'])
 

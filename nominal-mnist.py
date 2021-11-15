@@ -31,7 +31,7 @@ config = {
 }
 
 
-config['experiment_path'] = str(os.getcwd()) + "/AGS/Experiment_logs/" + config['experiment_name'] + "/"
+config['experiment_path'] = str(os.getcwd()) + "/Experiment_logs/" + config['experiment_name'] + "/"
 if not os.path.isdir(config['experiment_path']):
     os.mkdir(config['experiment_path'])
 
@@ -52,7 +52,7 @@ cnn = CNN4_4(in_channels=config['in_channels'], num_classes=config['num_classes'
 defense = Model(cnn, config, config['experiment_name'])
 
 
-defense.train(train_loader, test_loader)
+defense.train(val_loader, test_loader)
 
 
 fgsm = torchattacks.FGSM(copy.deepcopy(defense.model), eps=0.3)
