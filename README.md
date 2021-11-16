@@ -1,2 +1,3 @@
-# AGS
-AGS: Attribution Guided Sharpening
+AGS: Attribution Guided Sharpening as a Defense Against Adversarial Attacks - Paper submitted to IDA 2022
+
+Even though deep learning has allowed for significant advances in the last decade, it is still vulnerable to adversarial attacks - inputs that, despite looking similar to clean data, can force neural networks to make incorrect predictions. Moreover, deep learning models usually act as a black box or an oracle that does not provide any explanations behind its outputs. We propose Attribution Guided Sharpening (AGS), a defense against adversarial attacks that incorporates explainability techniques as a means to make neural networks robust. AGS uses the saliency maps generated on a non-robust model to guide Choi and Hall's sharpening method to denoise input images before passing them to a classifier. We show that AGS can outperform previous defenses on three benchmark datasets: MNIST, CIFAR-10 and CIFAR-100, and achieve state-of-the-art performance against AutoAttack.
